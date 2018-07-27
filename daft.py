@@ -79,7 +79,7 @@ class PGM(object):
         self._nodes[node.name] = node
         return node
 
-    def add_edge(self, name1, name2, directed=None, 
+    def add_edge(self, name1, name2, directed=None,
                  xoffset=0, yoffset=0, **kwargs):
         """
         Construct an :class:`Edge` between two named :class:`Node` objects.
@@ -173,7 +173,7 @@ class Node(object):
     :param plot_params: (optional)
         A dictionary of parameters to pass to the
         :class:`matplotlib.patches.Ellipse` constructor.
-    
+
     :param label_param: (optional)
         Default value: None
         FIXME (undocumented)
@@ -296,7 +296,7 @@ class Node(object):
             elif self.shape == "rectangle":
                 # Adapt to make Rectangle the same api than ellipse
                 wi = w
-                xy = ctx.convert(self.x, self.y) 
+                xy = ctx.convert(self.x, self.y)
                 xy[0] = xy[0] - wi / 2.
                 xy[1] = xy[1] - h /2.
 
@@ -320,7 +320,7 @@ class Node(object):
         elif self.shape =="rectangle":
             # Adapt to make Rectangle the same api than ellipse
             wi = diameter * aspect
-            xy = ctx.convert(self.x, self.y) 
+            xy = ctx.convert(self.x, self.y)
             xy[0] = xy[0] - wi / 2.
             xy[1] = xy[1] - diameter /2.
 
@@ -344,21 +344,21 @@ class Node(object):
 
     def get_frontier_coord(self, target_xy, ctx):
         """
-        Get the coordinates of the point of intersection between the 
+        Get the coordinates of the point of intersection between the
         shape of the node and a line starting from the center of the node to an
         arbitrary point. See the example of rectangle bellow:
 
-                    _____________                                      
-                    |            |    ____--X (target_node)             
-                    |        __--X----                                 
-                    |     X--    |(return coordinate of this point)    
-                    |            |                                     
-                    |____________|                                     
+                    _____________
+                    |            |    ____--X (target_node)
+                    |        __--X----
+                    |     X--    |(return coordinate of this point)
+                    |            |
+                    |____________|
 
         :target_xy: (x float, y float)
             A tuple of coordinate of target node
         """
-        
+
         # Scale the coordinates appropriately.
         x1, y1 = ctx.convert(self.x, self.y)
         x2, y2 = target_xy[0], target_xy[1]
@@ -367,7 +367,7 @@ class Node(object):
         a = self.aspect
         if a is None:
             a = ctx.aspect
-        
+
         if self.shape == 'ellipse':
             # Compute the distances.
             dx, dy = x2 - x1, y2 - y1
@@ -382,7 +382,7 @@ class Node(object):
             return x0, y0
 
         elif self.shape == 'rectangle':
-            
+
             dx, dy = x2 - x1, y2 - y1
 
             theta = np.angle(complex(dx, dy))
@@ -396,7 +396,7 @@ class Node(object):
             dxx2 =  self.scale*0.5*np.abs(dx/dy)*(np.sign(dx ) or 1.)
             dyy2 =  self.scale*0.5*(np.sign(dy ) or 1.)
             val2 = np.abs(complex(dxx2, dyy2))
-            
+
 
             if val1 < val2:
                 return x1 + dxx1, y1 + dyy1
@@ -496,7 +496,7 @@ class Edge(object):
             args = self._get_coords(ctx)
 
             #zero lengh arrow produce error
-            if not(args[2] == 0. and args[3] == 0.): 
+            if not(args[2] == 0. and args[3] == 0.):
                 ar = FancyArrow(*self._get_coords(ctx), width=0,
                     length_includes_head=True, **p)
 
@@ -555,6 +555,7 @@ class Plate(object):
         else:
             self.rect_params = None
         if bbox is not None:
+            bbox={"color": "none"}
             self.bbox = dict(bbox)
         else:
             self.bbox = None
@@ -580,7 +581,7 @@ class Plate(object):
             p = self.rect_params
         else:
             p = dict({})
-            
+
         p["ec"] = _pop_multiple(p, "k", "ec", "edgecolor")
         p["fc"] = _pop_multiple(p, "none", "fc", "facecolor")
         p["lw"] = _pop_multiple(p, ctx.line_width, "lw", "linewidth")
@@ -605,7 +606,8 @@ class Plate(object):
             ax.annotate(self.label, pos, xycoords="data",
                         xytext=offset, textcoords="offset points",
                         bbox=self.bbox,
-                        horizontalalignment=ha)
+                        horizontalalignment=ha,
+                        fontsize= ctx.label_params['fontsize'])
 
         return rect
 
