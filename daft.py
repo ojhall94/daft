@@ -54,6 +54,7 @@ class PGM(object):
                  observed_style="shaded",
                  line_width=1., node_ec="k",
                  directed=True, aspect=1.0,
+                 backset=.075,
                  label_params={}):
         self._nodes = {}
         self._edges = []
@@ -66,7 +67,8 @@ class PGM(object):
                                        line_width=line_width,
                                        node_ec=node_ec, directed=directed,
                                        aspect=aspect,
-                                       label_params=label_params)
+                                       label_params=label_params,
+                                       backset=backset)
 
     def add_node(self, node):
         """
@@ -245,6 +247,7 @@ class Node(object):
 
         p["alpha"] = p.get("alpha", 1)
 
+
         # And the label parameters.
         if self.label_params is None:
             l = dict(ctx.label_params)
@@ -339,6 +342,7 @@ class Node(object):
                     xycoords="data",
                     xytext=self.offset, textcoords="offset points",
                     **l)
+
 
         return el
 
@@ -459,8 +463,18 @@ class Edge(object):
         x3, y3 = self.node1.get_frontier_coord((x2, y2), ctx)
         x4, y4 = self.node2.get_frontier_coord((x1, y1), ctx)
 
+        x43 = x4-x3
+        y43 = y4-y3
 
-        return x3, y3, x4 - x3, y4 - y3
+        if x43 == 0:
+            y43 -= np.sign(y43)*ctx.backset
+        elif y43 == 0:
+            x43 -= np.sign(x43)*ctx.backset
+        else:
+            y43 -= np.sign(y43)*ctx.backset
+            x43 -= np.sign(x43)*ctx.backset
+
+        return x3 , y3, x43, y43
 
     def render(self, ctx):
         """
@@ -475,7 +489,6 @@ class Edge(object):
         p = self.plot_params
         p["linewidth"] = _pop_multiple(p, ctx.line_width,
                                        "lw", "linewidth")
-
         # Add edge annotation.
         if "label" in self.plot_params:
             x, y, dx, dy = self._get_coords(ctx)
@@ -670,6 +683,8 @@ class _rendering_context(object):
         self.aspect = kwargs.get("aspect", 1.0)
         self.label_params = dict(kwargs.get("label_params", {}))
 
+        #Hacked reduction on the arrows
+        self.backset = kwargs.get("backset", .075)
         # Initialize the figure to ``None`` to handle caching later.
         self._figure = None
         self._ax = None
